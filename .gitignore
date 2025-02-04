@@ -9,4 +9,5 @@
 /build
 /captures
 /app/src/main/jniLibs
+.idea/
 
