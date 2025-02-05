@@ -1,14 +1,15 @@
-[bgfx android activity](https://github.com/nodrev/bgfx-android-activity) - Android glue for bgfx
+[bgfx android activity](https://github.com/krisp3t/bgfx-android-activity) - Android glue for bgfx
 ================================================================================================
 
-A minimal Android Activity using `NativeActivity` class which allows to run [bgfx](https://github.com/bkaradzic/bgfx)'s examples onto Android platforms.
-![Android emulator with helloworld example](https://github.com/nodrev/bgfx-android-activity/raw/master/app/src/main/screenshot.png)
+A minimal Android Activity using `NativeActivity` class which allows to run [bgfx](https://github.com/bkaradzic/bgfx)'s examples onto Android platforms. 
 
-Forked from: https://github.com/Nodrev/bgfx-android-activity
+Very useful to quickly debug bgfx issues on devices, such as setting up OpenGL ES with EGL context. Simple setup and quick compilation times.
+
+# Table of Contents
+
 
 # Prerequisites
 
-**Remark**: Although those build instructions assume a linux platform to generate the APKs, the used tools are available for OSX and MSWindows. As a result, the specified commands should be easily adapted to work for those platforms.
 
 ## Determine minimum target
 
@@ -48,35 +49,37 @@ cd external/bgfx
 make projgen
 make android-arm & make android-arm64 & make android-x86
 ```
-Also modify `build.gradle` for chosen ABIs (default enabled are `armeabi-v7a` and `arm64-v8a`).
+
+This will build `libexamplesDebug.so` / `libexamplesRelease.so` in `bgfx-android-activity\external\bgfx\.build\android-arm64\bin` (for `android-arm64` ABI), which we will later copy
+
+
+Also modify `build.gradle` for chosen ABIs (default enabled is `arm64-v8a`).
 # Build APK
 
 ## Modify application ID
 
-Import the project in Android Studio, and edit `bgfx-android-activity/app/build.gradle`. Replace `applicationId` with your own application id. Set `compileSdkVersion` and `targetSdkVersion` to your android platform number:
-```
-    compileSdkVersion 26
+Import the project in Android Studio, and edit `bgfx-android-activity/app/build.gradle`. Replace `applicationId` with your own application id and set appropriate SDK numbers that you're targeting.
+```gradle
+android {
+    namespace 'com.krisp3t.bgfx.examples'
     defaultConfig {
-        applicationId 'com.nodrev.bgfx.examples'
-        minSdkVersion 23 // The version we use to compile bgfx
-        targetSdkVersion 26
+        applicationId 'com.krisp3t.bgfx.examples'
+        compileSdk 33
+        minSdk 23
+        targetSdk 26
         versionCode 100 // Application version, 3 digits, major/minor/revision
         versionName "1.0.0"
     }
 ```
 
-Edit `bgfx-android-activity/app/src/main/AndroidManifest.xml`, and set `package` value to the same application id:
-```
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nodrev.bgfx.examples">
-    [...]
-</manifest>
+Edit `bgfx-android-activity/app/src/java/...` and edit directory path of `BgfxAndroidActivity` so that it will match `applicationId`. Then also change the package import of `BgfxAndroidActivity`:
+
+```java
+package com.krisp3t.bgfx.examples;
 ```
 
-## Modify application name
-
-Edit `bgfx-android-activity/app/src/main/res/values/strings.xml`, and replace `app_name` value with your application name
-```
+Edit `bgfx-android-activity/app/src/main/res/values/strings.xml`, and replace `app_name` value with your application name.
+```xml
 <resources>
     <string name="app_name">BGFX Examples</string>
 </resources>
@@ -84,12 +87,12 @@ Edit `bgfx-android-activity/app/src/main/res/values/strings.xml`, and replace `a
 
 ## Define the library name
 
-To define the .so file to load by the native activity, you have to edit `bgfx-android-activity/app/src/main/AndroidManifest.xml`
-```
+To define the .so file to load by the native activity, you have to edit `bgfx-android-activity/app/src/main/AndroidManifest.xml`.
+```xml
 <activity android:name="android.app.NativeActivity"
     <!-- Tell NativeActivity the name of our .so (strip 'lib' and '.so') -->
     <meta-data android:name="android.app.lib_name"
-               android:value="examplesRelease" />
+               android:value="examplesDebug" />
 </activity>
 ```
 
@@ -100,7 +103,7 @@ public class BgfxAndroidActivity extends android.app.NativeActivity
     static
     {
         System.loadLibrary("c++_shared");
-        System.loadLibrary("examplesRelease");
+        System.loadLibrary("examplesDebug");
     }
 }
 ```
@@ -114,17 +117,23 @@ Some examples requires resource files, you will need to copy them to the Android
 
 **Remark:** This is not the official way to do for a real application, runtime files should be embedded into APK, but for bgfx examples, we go that way.
 
+Permissions needed:
+
 ## Packaging
 
 Launch android studio, and import the project. Select `Build` menu, and generate APK using `Make Project` entry.
 
-*Note: If you change the build variant to release, you'll need to sign your APK before deployment, this is off this tutorial's scope*
+*Note: If you change the build variant to release, you'll need to sign your APK before deployment, this is off this tutorial's scope.*
 
 To deploy to your target device, go to the `Run` menu and either choose `Run 'app'` or `Debug 'app'` entry.
 
-*Note: Generated APKs goes to `bgfx-android-activity/app/build/outputs/apk` directory*
+*Note: Generated APKs goes to `bgfx-android-activity/app/build/outputs/apk` directory.*
+
 
 # Debugging (Android Studio)
+
+# Licence
+This repository is a fork of Nodrev's [bgfx-android-activity](https://github.com/Nodrev/bgfx-android-activity).
 
 [License (BSD 2-clause)](https://github.com/nodrev/bgfx-android-activity/blob/master/LICENSE)
 -----------------------------------------------------------------------

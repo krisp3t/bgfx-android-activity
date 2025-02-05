@@ -49,7 +49,7 @@ public class BgfxAndroidActivity extends android.app.NativeActivity
                     // Permission refused, show a warning!
                     AlertDialog alertDialog = new AlertDialog.Builder(this).create();
                     alertDialog.setTitle("Warning");
-                    alertDialog.setMessage("Some examples needs to load data from the sdcard, those will crash if data can't be loaded!");
+                    alertDialog.setMessage("You need to copy runtime assets to /sdcard as described in README.md!");
                     alertDialog.setButton(AlertDialog.BUTTON_NEUTRAL, "OK", new DialogInterface.OnClickListener()
                     {
                         public void onClick(DialogInterface dialog, int which)
