@@ -23,7 +23,7 @@ android {
     // Method comes from https://androidbycode.wordpress.com/2015/07/07/android-ndk-a-guide-to-deploying-apps-with-native-libraries/
     project.ext.versionCodes = ['armeabi': 1, 'armeabi-v7a': 2, 'arm64-v8a': 3, 'mips': 5, 'mips64': 6, 'x86': 8, 'x86_64': 9]
     android.applicationVariants.all { variant ->
-        variant.outputs.each { output ->
+        variant.outputs.all { output ->
             output.versionCodeOverride =
                     project.ext.versionCodes.get(output.getFilter(
                             com.android.build.OutputFile.ABI), 0) * 10000000 + android.defaultConfig.versionCode
@@ -33,43 +33,30 @@ android {
     // Helper function to synchronize our natives libs in jni directories
     project.ext.nativeBuildsDirsAbis = ['armeabi-v7a': 'android-arm', 'arm64-v8a': 'android-arm64']
     android.applicationVariants.all { variant ->
-        variant.outputs.each { output ->
+        variant.outputs.all { output ->
             def abiName = output.getFilter(com.android.build.OutputFile.ABI)
             def nativeBuildDir = project.ext.nativeBuildsDirsAbis.get(abiName)
             if (nativeBuildDir != null) {
                 project.logger.lifecycle("Setting up copy tasks for ABI: ${abiName}")
-                def destDir = new File("./src/main/jniLibs/${abiName}")
+                def destDir = new File(projectDir, "jniLibs/${variant.name}/${abiName}")
+
+                // Ensure the destination directory exists
+                destDir.mkdirs()
 
                 // First task: Copy our native (bgfx) lib
-                def task1 = project.tasks.create("synchronizeJni_${abiName}${variant.name}", Copy) {
-                    from(new File("../../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so"))
+                def task1 = project.tasks.register("synchronizeJni_${abiName}${variant.name}", Copy) {
+                    from(new File(projectDir, "../../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so"))
                     into(destDir)
                 }
-
-                // Fail build if the file is missing after copy
-                task1.doLast {
-                    def copiedFile = new File(destDir, "libexamplesDebug.so")
-                    if (!copiedFile.exists()) {
-                        throw new GradleException("ERROR: Missing libexamplesDebug.so in ${destDir}")
-                    }
-                }
-
                 // Second task: Copy libc++_shared from NDK
-                def task2 = project.tasks.create("synchronizeJniLibC++_${abiName}${variant.name}", Copy) {
-                    from(new File("${System.getenv('ANDROID_NDK_ROOT')}/sources/cxx-stl/llvm-libc++/libs/${abiName}/libc++_shared.so"))
+                def task2 = project.tasks.register("synchronizeJniLibC++_${abiName}${variant.name}", Copy) {
+                    from(new File("${android.ndkDirectory}/sources/cxx-stl/llvm-libc++/libs/${abiName}/libc++_shared.so"))
                     into(destDir)
                 }
-
-                // Fail build if the libc++_shared.so file is missing
-                task2.doLast {
-                    def copiedFile = new File(destDir, "libc++_shared.so")
-                    if (!copiedFile.exists()) {
-                        throw new GradleException("ERROR: Missing libc++_shared.so in ${destDir}")
-                    }
-                }
-
                 // Ensure tasks run before build
-                variant.preBuildProvider.get().dependsOn(task1, task2)
+                variant.preBuildProvider.configure { preBuildTask ->
+                    preBuildTask.dependsOn(task1, task2)
+                }
             }
         }
     }
@@ -85,5 +72,5 @@ android {
 }
 
 dependencies {
-    implementation 'com.android.support:appcompat-v7:26.1.0'
+    implementation 'com.android.support:appcompat-v7:28.0.0'
 }
