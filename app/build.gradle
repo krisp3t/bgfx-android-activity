@@ -19,6 +19,21 @@ android {
             universalApk true
         }
     }
+
+    // Helper function to determine host-specific NDK directory
+    String osName = System.getProperty("os.name").toLowerCase()
+    String osArch = System.getProperty("os.arch").toLowerCase()
+    String toolchainOs = "";
+    if (osName.contains("win")) {
+        toolchainOs = "windows-x86_64"
+    } else if (osName.contains("linux")) {
+        toolchainOs = "linux-x86_64"
+    } else if (osName.contains("mac os x") || osName.contains("darwin")) {
+        toolchainOs = (osArch == "aarch64" || osArch.contains("arm64")) ? "darwin-arm64" : "darwin-x86_64"
+    } else {
+        throw new GradleException("Unsupported OS: ${osName}")
+    }
+
     // Helper function to generate a unique version code per application version and per abi
     // Method comes from https://androidbycode.wordpress.com/2015/07/07/android-ndk-a-guide-to-deploying-apps-with-native-libraries/
     project.ext.versionCodes = ['armeabi': 1, 'armeabi-v7a': 2, 'arm64-v8a': 3, 'mips': 5, 'mips64': 6, 'x86': 8, 'x86_64': 9]
@@ -45,13 +60,25 @@ android {
 
                 // First task: Copy our native (bgfx) lib
                 def task1 = project.tasks.register("synchronizeJni_${abiName}${variant.name}", Copy) {
-                    from(new File(projectDir, "../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so"))
+                    def libPath = new File(projectDir, "../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so")
+                    from(libPath)
                     into(destDir)
+                    doFirst {
+                        if (!libPath.exists()) {
+                            throw new GradleException("Native library not found: ${nativeLibPath}")
+                        }
+                    }
                 }
                 // Second task: Copy libc++_shared from NDK
                 def task2 = project.tasks.register("synchronizeJniLibC++_${abiName}${variant.name}", Copy) {
-                    from(new File("${System.getenv('ANDROID_NDK_ROOT')}/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/${toolchainBuildDir}/libc++_shared.so"))
+                    def libPath = new File("${System.getenv('ANDROID_NDK_ROOT')}/toolchains/llvm/prebuilt/${toolchainOs}/sysroot/usr/lib/${toolchainBuildDir}/libc++_shared.so")
+                    from(libPath)
                     into(destDir)
+                    doFirst {
+                        if (!libPath.exists()) {
+                            throw new GradleException("Native library not found: ${nativeLibPath}")
+                        }
+                    }
                 }
                 // Ensure tasks run before build
                 variant.preBuildProvider.configure { preBuildTask ->
