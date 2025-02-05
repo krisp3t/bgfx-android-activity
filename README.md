@@ -124,6 +124,8 @@ To deploy to your target device, go to the `Run` menu and either choose `Run 'ap
 
 *Note: Generated APKs goes to `bgfx-android-activity/app/build/outputs/apk` directory*
 
+# Debugging (Android Studio)
+
 [License (BSD 2-clause)](https://github.com/nodrev/bgfx-android-activity/blob/master/LICENSE)
 -----------------------------------------------------------------------
 
