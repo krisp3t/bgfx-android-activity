@@ -5,6 +5,10 @@ A minimal Android Activity using `NativeActivity` class which allows to run [bgf
 
 Very useful to quickly debug bgfx issues on devices, such as setting up OpenGL ES with EGL context. Simple setup and quick compilation times.
 
+![Screenshot_20250205_131036_BGFX Examples](https://github.com/user-attachments/assets/30020f58-481c-4b6e-9bf6-4c1107c3f442)
+
+
+
 # Table of Contents
 
 
