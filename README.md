@@ -10,6 +10,20 @@ Very useful to quickly debug bgfx issues on devices, such as setting up OpenGL E
 
 
 # Table of Contents
+1. [Prerequisites](#prerequisites)
+   - [Determine minimum target](#determine-minimum-target)
+   - [Android Studio](#android-studio)
+   - [Environment variables](#environment-variables)
+2. [Setup project](#setup-project)
+   - [Clone repositories](#clone-repositories)
+   - [Compile](#compile)
+3. [Build APK](#build-apk)
+   - [Modify application ID](#modify-application-id)
+   - [Define the library name](#define-the-library-name)
+   - [Resource files](#resource-files)
+   - [Packaging](#packaging)
+4. [Debugging (Android Studio)](#debugging-android-studio)
+5. [Licence](#licence)
 
 
 # Prerequisites
@@ -91,7 +105,7 @@ Edit `bgfx-android-activity/app/src/main/res/values/strings.xml`, and replace `a
 
 ## Define the library name
 
-To define the .so file to load by the native activity, you have to edit `bgfx-android-activity/app/src/main/AndroidManifest.xml`.
+To define the `.so` file to load by the native activity, you have to edit `bgfx-android-activity/app/src/main/AndroidManifest.xml`.
 ```xml
 <activity android:name="android.app.NativeActivity"
     <!-- Tell NativeActivity the name of our .so (strip 'lib' and '.so') -->
@@ -116,28 +130,46 @@ public class BgfxAndroidActivity extends android.app.NativeActivity
 
 Some examples requires resource files, you will need to copy them to the Android device (physical or emulator) SDCard using `adb`:
 ```shell
-~/android/sdk/platform-tools/adb push bgfx/examples/runtime /sdcard/bgfx/examples/runtime
+~/android/sdk/platform-tools/adb push external/bgfx/examples/runtime /sdcard/bgfx/examples/runtime
 ```
+> Of course, please don't do this in production and properly bundle runtime assets in your APK. The reason why we're doing this is because bgfx has this path hardcoded in `entry_android.cpp`, requiring the least work on our side.
 
-**Remark:** This is not the official way to do for a real application, runtime files should be embedded into APK, but for bgfx examples, we go that way.
+To read any files from /sdcard, we need to require `android.permission.MANAGE_EXTERNAL_STORAGE` (from API level 33) and `android.permission.READ_EXTERNAL_STORAGE` (below API level 33). Yet again, please don't do this in production.
 
-Permissions needed:
+## Launch & packaging
 
-## Packaging
+Launch Android Studio, and import the project. Select `Build` menu, and generate APK using `Make Project` entry.
 
-Launch android studio, and import the project. Select `Build` menu, and generate APK using `Make Project` entry.
+> If you change the build variant to release, you'll need to sign your APK before deployment, this is off this tutorial's scope.*
 
-*Note: If you change the build variant to release, you'll need to sign your APK before deployment, this is off this tutorial's scope.*
+To deploy to your target device, go to the `Run` menu and either choose `Run 'app'` or `Debug 'app'` entry. If they are greyed out, run `Sync Project with Gradle Files` first.
 
-To deploy to your target device, go to the `Run` menu and either choose `Run 'app'` or `Debug 'app'` entry.
-
-*Note: Generated APKs goes to `bgfx-android-activity/app/build/outputs/apk` directory.*
+> Note: Generated APKs go to `bgfx-android-activity/app/build/outputs/apk` directory.*
 
 
 # Debugging (Android Studio)
+When debugging app through Android Studio (either by launching in debug or attaching with debugger), you should be able to set breakpoints in native (C++) code.
+
+> Make sure that you have native debugging turned on in Run/Debug configurations, not just Java.
+
+You don't really need to give `.so` location to the debugger, as it should pick it up itself. It's important though that we disable debug symbols stripping (in `build.gradle`)
+
+```gradle
+buildTypes {
+	release { ... }
+	debug {
+		...
+		packagingOptions {
+			jniLibs.keepDebugSymbols += '**/*.so'
+		}
+	}
+}
+```
+
+You can either set symbolic breakpoints (with symbol names such as `GlContext::Create`) or line breakpoints, and the appropriate `.cpp` file should open up in your IDE.
 
 # Licence
-This repository is a fork of Nodrev's [bgfx-android-activity](https://github.com/Nodrev/bgfx-android-activity).
+This repository is a fork of Nodrev's [bgfx-android-activity](https://github.com/Nodrev/bgfx-android-activity). I've bumped it up to modern Android, improved build system & instructions and added debugging capabilities.
 
 [License (BSD 2-clause)](https://github.com/nodrev/bgfx-android-activity/blob/master/LICENSE)
 -----------------------------------------------------------------------
