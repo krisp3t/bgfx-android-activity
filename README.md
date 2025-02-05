@@ -14,67 +14,35 @@ By default, `bgfx` targets android API 24 (Android Nougat 7.0). So, if you have 
 
 Determine the minimal android version you wish to support, and get the corresponding API level using this page: https://source.android.com/source/build-numbers
 
-*Example: my phone runs Android Marshmallow 6.0.1, the platform number is 23*
+## Android Studio
 
-## Android Studio 3.2
-
-This project uses [Android Studio](http://developer.android.com/sdk/index.html) build system, Gradle, to generate Android's APK files, so you need to download it and install it properly. Android Studio comes with Android SDK, so no need to install it separatly.
-
-*Following commands assume it was installed to `~/android/android-studio` directory.*
-
-## Android NDK
-
-[Android NDK](http://developer.android.com/ndk/downloads/index.html) is required to compile bgfx for android platforms. You can install it using Android Studio's SDK Manager. 
-
-*Following commands assume it was installed to `~/android/sdk/ndk-bundle` directory.*
+This project uses [Android Studio](http://developer.android.com/sdk/index.html) build system, Gradle, to generate Android's APK files, so you need to download it and install it properly. Android Studio comes with Android SDK, so no need to install it separately.
 
 ## Environment variables
 
-```shell
-sudo pluma /etc/profile.d/ndk.sh
-```
-Add the following lines:
-```shell
-export ANDROID_NDK_ROOT=~/android/sdk/ndk-bundle
-export ANDROID_NDK_CLANG=$ANDROID_NDK_ROOT/toolchains/llvm/prebuilt/linux-x86_64
-export ANDROID_NDK_ARM=$ANDROID_NDK_ROOT/toolchains/arm-linux-androideabi-4.9/prebuilt/linux-x86_64
-export ANDROID_NDK_ARM64=$ANDROID_NDK_ROOT/toolchains/aarch64-linux-android-4.9/prebuilt/linux-x86_64
-export ANDROID_NDK_X86=$ANDROID_NDK_ROOT/toolchains/x86-4.9/prebuilt/linux-x86_64
-```
-*Note: Historically the NDK supported 32-bit and 64-bit MIPS (and so does `bgfx`), but support was removed in NDK r17.*
+Add `ANDROID_NDK_ROOT` as an environment variable. Should contain `toolchains` folder.
 
-You can also extend the `PATH` variable to be able to access Android platform tools (`adb`, `dmtracedump`, etc) from the shell:
-```shell
-export ANDROID_SDK_ROOT=~/android/sdk
-export PATH=$PATH:$ANDROID_SDK_ROOT/platform-tools
-```
+You can install Android NDK through Android Studio's SDK manager.
 
-You may need to reboot in order to reload those environment variables.
+You can also extend the `PATH` variable to be able to access Android platform tools (`adb`, `dmtracedump`, etc) from the shell.
 
 # Setup project
 
 ## Clone repositories
 
-```shell
-mkdir bgfx-android
-cd bgfx-android
-git clone https://github.com/bkaradzic/bx.git
-git clone https://github.com/bkaradzic/bimg.git
-git clone https://github.com/bkaradzic/bgfx.git
-git clone https://github.com/nodrev/bgfx-android-activity.git
-```
+Make sure to clone the repository with included submodules: `git clone --recursive`.
 
 ## Compile
 
-First, modify the file`bgfx/makefile` and modify the `projgen` to provide the minimal supported android platform (add `--with-android=xx`):
+First, modify the file `external/bgfx/makefile` and modify the `projgen` to provide the minimal supported Android platform (add `--with-android=xx`):
 ```makefile
 	$(GENIE) --with-android=23 --with-combined-examples --gcc=android-arm gmake
 	$(GENIE) --with-android=23 --with-combined-examples --gcc=android-x86 gmake
 ```
 
-Then, compile BGFX samples for every android abi we want to support:
+Then, compile BGFX samples for every Android ABI we want to support:
 ```shell
-cd bgfx
+cd external/bgfx
 make projgen
 make android-arm & make android-arm64 & make android-x86
 ```
