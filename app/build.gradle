@@ -61,24 +61,17 @@ android {
                 // First task: Copy our native (bgfx) lib
                 def task1 = project.tasks.register("synchronizeJni_${abiName}${variant.name}", Copy) {
                     def libPath = new File(projectDir, "../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so")
+                    assert libPath.exists()
                     from(libPath)
                     into(destDir)
-                    doFirst {
-                        if (!libPath.exists()) {
-                            throw new GradleException("Native library not found: ${nativeLibPath}")
-                        }
-                    }
+
                 }
                 // Second task: Copy libc++_shared from NDK
                 def task2 = project.tasks.register("synchronizeJniLibC++_${abiName}${variant.name}", Copy) {
                     def libPath = new File("${System.getenv('ANDROID_NDK_ROOT')}/toolchains/llvm/prebuilt/${toolchainOs}/sysroot/usr/lib/${toolchainBuildDir}/libc++_shared.so")
+                    assert libPath.exists()
                     from(libPath)
                     into(destDir)
-                    doFirst {
-                        if (!libPath.exists()) {
-                            throw new GradleException("Native library not found: ${nativeLibPath}")
-                        }
-                    }
                 }
                 // Ensure tasks run before build
                 variant.preBuildProvider.configure { preBuildTask ->
