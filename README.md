@@ -4,15 +4,17 @@
 A minimal Android Activity using `NativeActivity` class which allows to run [bgfx](https://github.com/bkaradzic/bgfx)'s examples onto Android platforms.
 ![Android emulator with helloworld example](https://github.com/nodrev/bgfx-android-activity/raw/master/app/src/main/screenshot.png)
 
+Forked from: https://github.com/Nodrev/bgfx-android-activity
+
 # Prerequisites
 
 **Remark**: Although those build instructions assume a linux platform to generate the APKs, the used tools are available for OSX and MSWindows. As a result, the specified commands should be easily adapted to work for those platforms.
 
 ## Determine minimum target
 
-By default, `bgfx` targets android API 24 (Android Nougat 7.0). So, if you have a phone or a tablet which runs an older Android version, you'll need to target the corresponding API number.
+By default, `bgfx` targets Android API 24 (Android Nougat 7.0). So, if you have a phone or a tablet which runs an older Android version, you'll need to target the corresponding API number.
 
-Determine the minimal android version you wish to support, and get the corresponding API level using this page: https://source.android.com/source/build-numbers
+Determine the minimal Android version you wish to support, and get the corresponding API level using this page: https://source.android.com/source/build-numbers
 
 ## Android Studio
 
@@ -46,7 +48,7 @@ cd external/bgfx
 make projgen
 make android-arm & make android-arm64 & make android-x86
 ```
-
+Also modify `build.gradle` for chosen ABIs (default enabled are `armeabi-v7a` and `arm64-v8a`).
 # Build APK
 
 ## Modify application ID

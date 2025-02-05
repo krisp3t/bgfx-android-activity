@@ -1,10 +1,10 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.nodrev.bgfx.examples">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- This is the default platform API bgfx uses. -->
 
     <!-- Need permissions to access bgfx examples resources files from
-         "/sdcard/bgfx/examples/runtime" (see "bgfx/examples/common/entry/entry_android.cpp") -->
+         "/sdcard/bgfx/examples/runtime" (see "external/bgfx/examples/common/entry/entry_android.cpp") -->
+    <uses-permission android:name="android.permission.MANAGE_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
 
     <application
@@ -21,7 +21,7 @@
             android:screenOrientation="portrait">
             <!-- Tell NativeActivity the name of our .so (strip 'lib' and '.so') -->
             <meta-data android:name="android.app.lib_name"
-                android:value="examplesRelease" />
+                android:value="examplesDebug" />
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

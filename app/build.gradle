@@ -1,12 +1,12 @@
 apply plugin: 'com.android.application'
 
 android {
-    compileSdkVersion 26
-    buildToolsVersion "28.0.3"
+    namespace 'com.krisp3t.bgfx.examples'
     defaultConfig {
-        applicationId 'com.nodrev.bgfx.examples'
-        minSdkVersion 23
-        targetSdkVersion 26
+        applicationId 'com.krisp3t.bgfx.examples'
+        compileSdk 33
+        minSdk 23
+        targetSdk 26
         versionCode 100 // Application version, 3 digits, major/minor/revision
         versionName "1.0.0"
     }
@@ -15,7 +15,7 @@ android {
         abi {
             enable true
             reset()
-            include 'armeabi-v7a', 'x86'
+            include 'armeabi-v7a', 'arm64-v8a'
             universalApk true
         }
     }
@@ -30,15 +30,15 @@ android {
         }
     }
     // Helper function to synchronize our natives libs in jni directories
-    project.ext.nativeBuildsDirsAbis = ['armeabi-v7a': 'android-arm', 'x86': 'android-x86']
+    project.ext.nativeBuildsDirsAbis = ['armeabi-v7a': 'android-arm', 'arm64-v8a': 'android-arm64']
     android.applicationVariants.all { variant ->
         variant.outputs.each { output ->
             def abiName = output.getFilter(com.android.build.OutputFile.ABI)
             def nativeBuildDir = project.ext.nativeBuildsDirsAbis.get(abiName)
-            if(nativeBuildDir != null) {
+            if (nativeBuildDir != null) {
                 // First task, copy our native lib to the corresponding jni directory
                 def task1 = project.tasks.create("synchronizeJni_${abiName}${variant.name}", Copy)
-                task1.from("./../../bgfx/.build/${nativeBuildDir}/bin/libexamplesRelease.so")
+                task1.from("./../../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so")
                 task1.into("./src/main/jniLibs/${abiName}")
 
                 // Second task, copy libc++_shared from NDK to the corresponding jni directory
@@ -47,8 +47,8 @@ android {
                 task2.into("./src/main/jniLibs/${abiName}")
 
                 // Insert our copy tasks at the beginning of gradle build tree.
-                variant.preBuild.dependsOn task1
-                variant.preBuild.dependsOn task2
+                variant.preBuildProvider.get().dependsOn task1
+                variant.preBuildProvider.get().dependsOn task2
             }
         }
     }
