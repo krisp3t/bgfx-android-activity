@@ -30,27 +30,27 @@ android {
         }
     }
 
-    // Helper function to synchronize our natives libs in jni directories
-    project.ext.nativeBuildsDirsAbis = ['armeabi-v7a': 'android-arm', 'arm64-v8a': 'android-arm64']
+    // Helper function to synchronize our natives libs in JNI directories
+    project.ext.nativeBuildsDirsAbis = ['arm64-v8a': 'android-arm64']
+    project.ext.toolchainDirsAbis = ['arm64-v8a': 'aarch64-linux-android']
     android.applicationVariants.all { variant ->
         variant.outputs.all { output ->
             def abiName = output.getFilter(com.android.build.OutputFile.ABI)
             def nativeBuildDir = project.ext.nativeBuildsDirsAbis.get(abiName)
+            def toolchainBuildDir = project.ext.toolchainDirsAbis.get(abiName)
             if (nativeBuildDir != null) {
                 project.logger.lifecycle("Setting up copy tasks for ABI: ${abiName}")
-                def destDir = new File(projectDir, "jniLibs/${variant.name}/${abiName}")
-
-                // Ensure the destination directory exists
+                def destDir = new File(projectDir, "src/main/jniLibs/${abiName}")
                 destDir.mkdirs()
 
                 // First task: Copy our native (bgfx) lib
                 def task1 = project.tasks.register("synchronizeJni_${abiName}${variant.name}", Copy) {
-                    from(new File(projectDir, "../../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so"))
+                    from(new File(projectDir, "../external/bgfx/.build/${nativeBuildDir}/bin/libexamplesDebug.so"))
                     into(destDir)
                 }
                 // Second task: Copy libc++_shared from NDK
                 def task2 = project.tasks.register("synchronizeJniLibC++_${abiName}${variant.name}", Copy) {
-                    from(new File("${android.ndkDirectory}/sources/cxx-stl/llvm-libc++/libs/${abiName}/libc++_shared.so"))
+                    from(new File("${System.getenv('ANDROID_NDK_ROOT')}/toolchains/llvm/prebuilt/windows-x86_64/sysroot/usr/lib/${toolchainBuildDir}/libc++_shared.so"))
                     into(destDir)
                 }
                 // Ensure tasks run before build
