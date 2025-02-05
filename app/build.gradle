@@ -86,7 +86,13 @@ android {
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
         debug {
+            debuggable true
             jniDebuggable true
+            minifyEnabled false
+            shrinkResources false
+            packagingOptions {
+                jniLibs.keepDebugSymbols += '**/*.so'
+            }
         }
     }
 }
