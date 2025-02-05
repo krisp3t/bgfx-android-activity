@@ -168,6 +168,9 @@ buildTypes {
 
 You can either set symbolic breakpoints (with symbol names such as `GlContext::Create`) or line breakpoints, and the appropriate `.cpp` file should open up in your IDE.
 
+![Screenshot 2025-02-05 183827](https://github.com/user-attachments/assets/48f576cb-0a38-43e3-aa50-fd2d14e035dd)
+
+
 # Licence
 This repository is a fork of Nodrev's [bgfx-android-activity](https://github.com/Nodrev/bgfx-android-activity). I've bumped it up to modern Android, improved build system & instructions and added debugging capabilities.
 
